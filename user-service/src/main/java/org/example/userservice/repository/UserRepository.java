@@ -3,7 +3,11 @@ package org.example.userservice.repository;
 import org.example.userservice.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource
+import java.util.Optional;
+
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+        Optional<User> findByEmail(String email);
 }
