@@ -166,7 +166,6 @@ public class AuthServiceImp implements AuthService {
 
             LOGGER.info("User authentication successful for: " + request.getEmail());
 
-            // Use MultiValueMap instead of HashMap
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add("client_id", CLIENT_ID);
             requestBody.add("client_secret", CLIENT_SECRET);
@@ -190,7 +189,6 @@ public class AuthServiceImp implements AuthService {
 
             LOGGER.info("Successfully authenticated with Keycloak");
 
-            // Parse the response
             JSONObject jsonResponse = new JSONObject(response.getBody());
             UserLoginResponse loginResponse = new UserLoginResponse();
             loginResponse.setAccessToken(jsonResponse.getString("access_token"));
@@ -201,7 +199,7 @@ public class AuthServiceImp implements AuthService {
 
         } catch (UserNotFoundException | InvalidCredentialsException | KeycloakAuthenticationException e) {
             LOGGER.warning("Authentication error: " + e.getMessage());
-            throw e; // Re-throw for GlobalExceptionHandler
+            throw e;
         } catch (Exception e) {
             LOGGER.severe("Unexpected error during login: " + e.getMessage());
             throw new RuntimeException("An unexpected error occurred during login", e);
