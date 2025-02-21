@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -19,48 +21,25 @@ import java.util.stream.Collectors;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/register", "/login", "/oauth2/authorization/**", "/search/**").permitAll()
-                        .pathMatchers("/users/**").hasAuthority("USER")
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor()))
+                        .jwt(jwt -> jwt.jwtDecoder(reactiveJwtDecoder()))
                 );
-
         return http.build();
     }
 
     @Bean
-    public ReactiveJwtAuthenticationConverterAdapter grantedAuthoritiesExtractor() {
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Map<String, Object> claims = jwt.getClaims();
-
-            System.out.println("DEBUG: JWT Claims: " + claims);
-
-            Object realmAccess = claims.get("realm_access");
-            if (realmAccess instanceof Map) {
-                List<String> roles = (List<String>) ((Map<String, Object>) realmAccess).get("roles");
-
-                if (roles != null) {
-                    System.out.println("DEBUG: Extracted roles: " + roles);
-
-                    List<GrantedAuthority> authorities = roles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
-
-                    System.out.println("DEBUG: Extracted authorities: " + authorities);
-                    return authorities;
-                }
-            }
-            return List.of();
-        });
-
-        return new ReactiveJwtAuthenticationConverterAdapter(jwtConverter);
+    public ReactiveJwtDecoder reactiveJwtDecoder() {
+        String jwkSetUri = "https://your-oauth2-provider/.well-known/jwks.json";
+        return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
+
+
+
 }
