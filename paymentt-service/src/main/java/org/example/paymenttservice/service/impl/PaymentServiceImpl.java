@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -20,7 +21,12 @@ public class PaymentServiceImpl implements PaymentService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+
+    private String generateTransactionId() {
+        return "TX-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    }
     @Override
+
     public Payment createPayment(Long orderId, Double amount) {
         Payment payment = new Payment();
         payment.setOrderId(orderId);
@@ -28,11 +34,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus("PENDING");
         payment.setPaymentDate(LocalDateTime.now());
 
+        payment.setPaymentMethod("CARTE");
         boolean paymentSuccess = simulatePaymentGateway();
 
         if (paymentSuccess) {
             payment.setStatus("SUCCESS");
-            payment.setTransactionId("TX123456789");
+            payment.setTransactionId(generateTransactionId());
         } else {
             payment.setStatus("FAILED");
         }
@@ -47,6 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         return savedPayment;
     }
+
 
     @Override
     public Payment getPaymentById(Long id) {

@@ -1,9 +1,10 @@
 package org.example.paymenttservice.event;
 
-import lombok.Data;
 
+import java.io.Serializable;
 
-public class PaymentProcessedEvent {
+public class PaymentProcessedEvent  implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long orderId;
     private String status;
     private String transactionId;

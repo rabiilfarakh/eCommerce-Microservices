@@ -4,7 +4,7 @@ import org.example.paymenttservice.entity.Payment;
 import org.example.paymenttservice.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.example.paymenttservice.dto.PaymentRequest;
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
@@ -17,8 +17,8 @@ public class PaymentController {
     }
 
     @PostMapping
-    public Payment createPayment(@RequestParam Long orderId, @RequestParam Double amount) {
-        return paymentService.createPayment(orderId, amount);
+    public Payment createPayment(@RequestBody PaymentRequest request) {
+        return paymentService.createPayment(request.getOrderId(), request.getAmount());
     }
 
     @GetMapping("/{id}")
