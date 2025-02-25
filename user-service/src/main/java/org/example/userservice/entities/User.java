@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
@@ -18,7 +19,9 @@ public class User {
     private String firstName;
     private String lastName;
     private String address;
+    private String cell;
     private String email;
     private String password;
+    private String role;
 
 }

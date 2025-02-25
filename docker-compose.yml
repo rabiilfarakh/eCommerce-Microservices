@@ -1,4 +1,3 @@
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:22.0
@@ -30,5 +29,34 @@ services:
     volumes:
       - keycloak_data:/var/lib/postgresql/data
 
+
+  user-service:
+    image: user-service
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-service-db:5432/user_service_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: action
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/eCommerce
+    depends_on:
+      - keycloak
+      - user-service-db
+
+    user-service-db:
+      image: postgres:14
+      container_name: user-service-db
+      environment:
+        POSTGRES_DB: user_service_db
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: action
+      ports:
+        - "5433:5432"
+
 volumes:
   keycloak_data:
+  user_service_data:
