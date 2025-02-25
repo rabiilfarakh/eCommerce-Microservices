@@ -19,39 +19,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/users/**").hasAuthority("USER")
+                        .requestMatchers("/eureka/**").permitAll()
+                        .requestMatchers("/payments/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
-
-        http.csrf(csrf -> csrf.disable());
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable());
 
         return http.build();
-    }
-
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Map<String, Object> claims = jwt.getClaims();
-            Object realmAccess = claims.get("realm_access");
-
-            if (realmAccess instanceof Map) {
-                List<String> roles = (List<String>) ((Map<String, Object>) realmAccess).get("roles");
-
-                if (roles != null) {
-                    return roles.stream()
-                            .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role))
-                            .collect(Collectors.toList());
-                }
-            }
-            return List.of();
-        });
-
-        return converter;
     }
 }
